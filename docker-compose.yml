@@ -1,0 +1,6 @@
+services:
+  php:
+    build: ./docker/php
+    volumes:
+      - ./:/app
+    tty: true
