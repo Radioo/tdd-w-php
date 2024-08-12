@@ -10,12 +10,15 @@ use Makao\Exception\CardNotFoundException;
 use Makao\Exception\MethodNotAllowedException;
 use Override;
 
-class CardCollection implements Countable, Iterator, ArrayAccess
-{
+class CardCollection implements Countable, Iterator, ArrayAccess {
     private const int FIRST_CARD_INDEX = 0;
 
     private array $cards = [];
     private int $position = self::FIRST_CARD_INDEX;
+
+    public function __construct(array $cards = []) {
+        $this->cards = $cards;
+    }
 
     #[Override]
     public function count(): int {
@@ -86,5 +89,9 @@ class CardCollection implements Countable, Iterator, ArrayAccess
     #[Override]
     public function offsetUnset(mixed $offset): void {
         unset($this->cards[$offset]);
+    }
+
+    public function toArray(): array {
+        return $this->cards;
     }
 }

@@ -24,7 +24,7 @@ class CardCollectionTest extends TestCase
 
     public function testShouldAddNewCardToCardCollection(): void {
         // Given
-        $card = new Card();
+        $card = new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT);
 
         // When
         $this->cardCollectionUnderTest->add($card);
@@ -35,8 +35,8 @@ class CardCollectionTest extends TestCase
 
     public function testShouldAddNewCardsInChainToCardCollection(): void {
         // Given
-        $firstCard = new Card();
-        $secondCard = new Card();
+        $firstCard = new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT);
+        $secondCard = new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE);
 
         // When
         $this->cardCollectionUnderTest
@@ -58,7 +58,7 @@ class CardCollectionTest extends TestCase
 
     public function testShouldIterableOnCardCollection(): void {
         // Given
-        $card = new Card();
+        $card = new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT);
 
         // When & Then
         $this->cardCollectionUnderTest->add($card);
@@ -78,8 +78,8 @@ class CardCollectionTest extends TestCase
 
     public function testShouldGetFirstCardFromCardCollectionAndRemoveThisCardFromDeck(): void {
         // Given
-        $firstCard = new Card();
-        $secondCard = new Card();
+        $firstCard = new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT);
+        $secondCard = new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE);
 
         $this->cardCollectionUnderTest
             ->add($firstCard)
@@ -100,8 +100,8 @@ class CardCollectionTest extends TestCase
         $this->expectExceptionMessage('You can not pick a card from empty CardCollection');
 
         // Given
-        $firstCard = new Card();
-        $secondCard = new Card();
+        $firstCard = new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT);
+        $secondCard = new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE);
 
         $this->cardCollectionUnderTest
             ->add($firstCard)
@@ -123,9 +123,23 @@ class CardCollectionTest extends TestCase
         $this->expectExceptionMessage('You can not add a card to CardCollection as array. Use addCard() method!');
 
         // Given
-        $card = new Card();
+        $card = new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT);
 
         // When
         $this->cardCollectionUnderTest[] = $card;
+    }
+
+    public function testShouldReturnCollectionAsArray(): void {
+        // Given
+        $cards = [
+            new Card(Card::COLOR_CLUB, Card::VALUE_EIGHT),
+            new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE),
+        ];
+
+        // When
+        $actual = new CardCollection($cards);
+
+        // Then
+        $this->assertEquals($cards, $actual->toArray());
     }
 }
