@@ -30,7 +30,7 @@ class TableTest extends TestCase
         // Given
         $expected = 1;
         $this->tableUnderTest = new Table();
-        $player = new Player();
+        $player = new Player('John');
 
         // When
         $this->tableUnderTest->addPlayer($player);
@@ -46,8 +46,8 @@ class TableTest extends TestCase
         $this->tableUnderTest = new Table();
 
         // When
-        $this->tableUnderTest->addPlayer(new Player());
-        $this->tableUnderTest->addPlayer(new Player());
+        $this->tableUnderTest->addPlayer(new Player('John'));
+        $this->tableUnderTest->addPlayer(new Player('Andy'));
         $actual = $this->tableUnderTest->countPlayers();
 
         // Then
@@ -60,10 +60,10 @@ class TableTest extends TestCase
         $this->expectExceptionMessage('Max capacity is 4 players!');
 
         // When
-        $this->tableUnderTest->addPlayer(new Player());
-        $this->tableUnderTest->addPlayer(new Player());
-        $this->tableUnderTest->addPlayer(new Player());
-        $this->tableUnderTest->addPlayer(new Player());
-        $this->tableUnderTest->addPlayer(new Player());
+        $this->tableUnderTest->addPlayer(new Player('John'));
+        $this->tableUnderTest->addPlayer(new Player('Mike'));
+        $this->tableUnderTest->addPlayer(new Player('Andy'));
+        $this->tableUnderTest->addPlayer(new Player('Tom'));
+        $this->tableUnderTest->addPlayer(new Player('Jerry'));
     }
 }
