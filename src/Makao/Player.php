@@ -5,6 +5,8 @@ namespace Makao;
 use Makao\Collection\CardCollection;
 
 class Player {
+    private const string MAKAO = 'Makao';
+
     private string $name;
     private CardCollection $cardCollection;
 
@@ -21,9 +23,15 @@ class Player {
         return $this->cardCollection;
     }
 
-    public function takeCard(CardCollection $cardCollection): self {
-        $this->cardCollection->add($cardCollection->pickCard());
+    public function takeCards(CardCollection $cardCollection, int $count = 1): self {
+        for($i = 0; $i < $count; $i++) {
+            $this->cardCollection->add($cardCollection->pickCard());
+        }
 
         return $this;
+    }
+
+    public function sayMakao(): string {
+        return self::MAKAO;
     }
 }

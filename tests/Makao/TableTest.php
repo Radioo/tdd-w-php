@@ -2,6 +2,8 @@
 
 namespace Tests\Makao;
 
+use Makao\Card;
+use Makao\Collection\CardCollection;
 use Makao\Exception\TooManyPlayersAtTheTableException;
 use Makao\Player;
 use Makao\Table;
@@ -65,5 +67,27 @@ class TableTest extends TestCase
         $this->tableUnderTest->addPlayer(new Player('Andy'));
         $this->tableUnderTest->addPlayer(new Player('Tom'));
         $this->tableUnderTest->addPlayer(new Player('Jerry'));
+    }
+
+    public function testShouldReturnEmptyCardCollectionForPlayedCard(): void {
+        // When
+        $actual = $this->tableUnderTest->getPlayedCards();
+
+        // Then
+        $this->assertCount(0, $actual);
+    }
+
+    public function testShouldPutCardDeckOnTable(): void {
+        // Given
+        $cards = new CardCollection([
+            new Card(Card::COLOR_HEART, Card::VALUE_FOUR),
+        ]);
+
+        // When
+        $table = new Table($cards);
+        $actual = $table->getCardDeck();
+
+        // Then
+        $this->assertSame($cards, $actual);
     }
 }
