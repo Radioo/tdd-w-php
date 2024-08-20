@@ -7,10 +7,12 @@ use Makao\Table;
 
 class GameService {
     private Table $table;
+    private CardService $cardService;
     private bool $isStarted = false;
 
-    public function __construct(Table $table = null) {
-        $this->table = $table ?? new Table();
+    public function __construct(Table $table, CardService $cardService) {
+        $this->table = $table;
+        $this->cardService = $cardService;
     }
 
     public function isStarted(): bool {
@@ -35,5 +37,12 @@ class GameService {
 
     public function startGame(): void {
         $this->isStarted = true;
+    }
+
+    public function prepareCardDeck(): Table {
+        $cardCollection = $this->cardService->createDeck();
+        $cardDeck = $this->cardService->shuffle($cardCollection);
+
+        return $this->table->addCardCollectionToDeck($cardDeck);
     }
 }

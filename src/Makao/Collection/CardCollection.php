@@ -94,4 +94,12 @@ class CardCollection implements Countable, Iterator, ArrayAccess {
     public function toArray(): array {
         return $this->cards;
     }
+
+    public function addCollection(CardCollection $cardCollection): self {
+        foreach(clone $cardCollection as $card) {
+            $this->add($card);
+        }
+
+        return $this;
+    }
 }
