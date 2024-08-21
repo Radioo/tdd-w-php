@@ -31,13 +31,13 @@ class CardCollection implements Countable, Iterator, ArrayAccess {
         return $this;
     }
 
-    public function pickCard(): Card {
+    public function pickCard(int $index = self::FIRST_CARD_INDEX): Card {
         if(empty($this->cards)) {
             throw new CardNotFoundException('You can not pick a card from empty CardCollection');
         }
 
-        $pickedCard = $this->offsetGet(self::FIRST_CARD_INDEX);
-        $this->offsetUnset(self::FIRST_CARD_INDEX);
+        $pickedCard = $this->offsetGet($index);
+        $this->offsetUnset($index);
         $this->cards = array_values($this->cards);
 
         return $pickedCard;

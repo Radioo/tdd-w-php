@@ -23,6 +23,10 @@ class Player {
         return $this->cardCollection;
     }
 
+    public function pickCard(int $index = 0): Card {
+        return $this->getCards()->pickCard($index);
+    }
+
     public function takeCards(CardCollection $cardCollection, int $count = 1): self {
         for($i = 0; $i < $count; $i++) {
             $this->cardCollection->add($cardCollection->pickCard());
