@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Makao\Validator;
+namespace Tests\unit\Makao\Validator;
 
 use Makao\Card;
 use Makao\Exception\CardDuplicationException;

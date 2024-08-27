@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Makao;
+namespace Tests\unit\Makao;
 
 use Makao\Card;
 use Makao\Collection\CardCollection;
@@ -103,5 +103,90 @@ class TableTest extends TestCase
 
         // Then
         $this->assertEquals($cardCollection, $actual->getCardDeck());
+    }
+
+    public function testShouldReturnCurrentPlayer(): void {
+        // Given
+        $player1 = new Player('John');
+        $player2 = new Player('Andy');
+        $player3 = new Player('Tom');
+
+        $this->tableUnderTest->addPlayer($player1);
+        $this->tableUnderTest->addPlayer($player2);
+        $this->tableUnderTest->addPlayer($player3);
+
+        // When
+        $actual = $this->tableUnderTest->getCurrentPlayer();
+
+        // Then
+        $this->assertSame($player1, $actual);
+    }
+
+    public function testShouldReturnNextPlayer(): void {
+        // Given
+        $player1 = new Player('John');
+        $player2 = new Player('Andy');
+        $player3 = new Player('Tom');
+
+        $this->tableUnderTest->addPlayer($player1);
+        $this->tableUnderTest->addPlayer($player2);
+        $this->tableUnderTest->addPlayer($player3);
+
+        // When
+        $actual = $this->tableUnderTest->getNextPlayer();
+
+        // Then
+        $this->assertSame($player2, $actual);
+    }
+
+    public function testShouldReturnPreviousPlayer(): void {
+        // Given
+        $player1 = new Player('John');
+        $player2 = new Player('Andy');
+        $player3 = new Player('Tom');
+
+        $this->tableUnderTest->addPlayer($player1);
+        $this->tableUnderTest->addPlayer($player2);
+        $this->tableUnderTest->addPlayer($player3);
+
+        // When
+        $actual = $this->tableUnderTest->getPreviousPlayer();
+
+        // Then
+        $this->assertSame($player3, $actual);
+    }
+
+    public function testShouldSwitchCurrentPlayerWhenRoundIsFinished(): void {
+        // Given
+        $player1 = new Player('John');
+        $player2 = new Player('Andy');
+        $player3 = new Player('Tom');
+
+        $this->tableUnderTest->addPlayer($player1);
+        $this->tableUnderTest->addPlayer($player2);
+        $this->tableUnderTest->addPlayer($player3);
+
+        // When & Then
+        $this->assertSame($player1, $this->tableUnderTest->getCurrentPlayer());
+        $this->assertSame($player2, $this->tableUnderTest->getNextPlayer());
+        $this->assertSame($player3, $this->tableUnderTest->getPreviousPlayer());
+
+        $this->tableUnderTest->finishRound();
+
+        $this->assertSame($player2, $this->tableUnderTest->getCurrentPlayer());
+        $this->assertSame($player3, $this->tableUnderTest->getNextPlayer());
+        $this->assertSame($player1, $this->tableUnderTest->getPreviousPlayer());
+
+        $this->tableUnderTest->finishRound();
+
+        $this->assertSame($player3, $this->tableUnderTest->getCurrentPlayer());
+        $this->assertSame($player1, $this->tableUnderTest->getNextPlayer());
+        $this->assertSame($player2, $this->tableUnderTest->getPreviousPlayer());
+
+        $this->tableUnderTest->finishRound();
+
+        $this->assertSame($player1, $this->tableUnderTest->getCurrentPlayer());
+        $this->assertSame($player2, $this->tableUnderTest->getNextPlayer());
+        $this->assertSame($player3, $this->tableUnderTest->getPreviousPlayer());
     }
 }

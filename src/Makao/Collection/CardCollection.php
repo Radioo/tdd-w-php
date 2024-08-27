@@ -60,7 +60,7 @@ class CardCollection implements Countable, Iterator, ArrayAccess {
 
     #[Override]
     public function valid(): bool {
-        return isset($this->cards[$this->position]);
+        return $this->offsetExists($this->position);
     }
 
     #[Override]

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Makao;
+namespace Tests\unit\Makao;
 
 use Makao\Card;
 use Makao\Collection\CardCollection;

@@ -10,12 +10,13 @@ class Table
     const int MAX_PLAYERS = 4;
 
     private array $players = [];
+    private $currentPlayerIndex = 0;
     private CardCollection $cardDeck;
     private CardCollection $playedCards;
 
-    public function __construct(CardCollection $cardDeck = null) {
+    public function __construct(CardCollection $cardDeck = null, CardCollection $playedCards = null) {
         $this->cardDeck = $cardDeck ?? new CardCollection();
-        $this->playedCards = new CardCollection();
+        $this->playedCards = $playedCards ?? new CardCollection();
     }
 
     public function countPlayers(): int {
@@ -42,5 +43,23 @@ class Table
         $this->cardDeck->addCollection($cardCollection);
 
         return $this;
+    }
+
+    public function getCurrentPlayer(): Player {
+        return $this->players[$this->currentPlayerIndex];
+    }
+
+    public function getNextPlayer(): Player {
+        return $this->players[$this->currentPlayerIndex + 1] ?? $this->players[0];
+    }
+
+    public function getPreviousPlayer(): Player {
+        return $this->players[$this->currentPlayerIndex - 1] ?? $this->players[$this->countPlayers() - 1];
+    }
+
+    public function finishRound(): void {
+        if(++$this->currentPlayerIndex === $this->countPlayers()) {
+            $this->currentPlayerIndex = 0;
+        }
     }
 }
