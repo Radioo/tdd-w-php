@@ -4,6 +4,7 @@ namespace Tests\unit\Makao;
 
 use Makao\Card;
 use Makao\Collection\CardCollection;
+use Makao\Exception\CardNotFoundException;
 use Makao\Player;
 use PHPUnit\Framework\TestCase;
 
@@ -96,5 +97,92 @@ class PlayerTest extends TestCase {
 
         // Then
         $this->assertEquals('Makao', $actual);
+    }
+
+    public function testShouldThrowCardNotFoundExceptionWhenPlayerTriesPickingCardByValueAndDoesntHaveSuchCard(): void {
+        // Expect
+        $this->expectException(CardNotFoundException::class);
+        $this->expectExceptionMessage('Player John does not have card with value 2');
+
+        // Given
+        $player = new Player('John');
+
+        // When
+        $player->pickCardByValue(Card::VALUE_TWO);
+    }
+
+    public function testShouldPickedCardByValueWhenPlayerHasSuchCard(): void {
+        // Given
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_TWO);
+        $player = new Player('John', new CardCollection([
+            $card
+        ]));
+
+        // When
+        $actual = $player->pickCardByValue(Card::VALUE_TWO);
+
+        // Then
+        $this->assertEquals($card, $actual);
+    }
+
+    public function testShouldReturnFirstCardByValueWhenPlayerHasMoreCorrectCards(): void {
+        // Given
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_TWO);
+        $player = new Player('John', new CardCollection([
+            $card,
+            new Card(Card::COLOR_SPADE, Card::VALUE_TWO),
+            new Card(Card::COLOR_DIAMOND, Card::VALUE_TWO),
+        ]));
+
+        // When
+        $actual = $player->pickCardByValue(Card::VALUE_TWO);
+
+        // Then
+        $this->assertEquals($card, $actual);
+    }
+
+    public function testShouldReturnTrueWhenPlayerCanPlayRound(): void {
+        // Given
+        $player = new Player('John');
+
+        // When
+        $actual = $player->canPlayRound();
+
+        // Then
+        $this->assertTrue($actual);
+    }
+
+    public function testShouldReturnFalseWhenPlayerCannotPlayRound(): void {
+        // Given
+        $player = new Player('John');
+
+        // When
+        $player->addRoundToSkip();
+
+        // Then
+        $this->assertFalse($player->canPlayRound());
+    }
+
+    public function testShouldSkipManyRoundsAndBackToPlayAfter(): void {
+        // Given
+        $player = new Player('John');
+
+        // When & Then
+        $this->assertTrue($player->canPlayRound());
+
+        $player->addRoundToSkip(2);
+
+        $this->assertFalse($player->canPlayRound());
+        $this->assertSame(2, $player->getRoundsToSkip());
+
+        $player->skipRound();
+
+        $this->assertSame(1, $player->getRoundsToSkip());
+        $this->assertFalse($player->canPlayRound());
+
+        $player->skipRound();
+
+        $this->assertSame(0, $player->getRoundsToSkip());
+        $this->assertTrue($player->canPlayRound());
     }
 }

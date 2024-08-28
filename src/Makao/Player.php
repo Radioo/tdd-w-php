@@ -3,12 +3,14 @@
 namespace Makao;
 
 use Makao\Collection\CardCollection;
+use Makao\Exception\CardNotFoundException;
 
 class Player {
     private const string MAKAO = 'Makao';
 
     private string $name;
     private CardCollection $cardCollection;
+    private int $roundsToSkip = 0;
 
     public function __construct(string $name, ?CardCollection $cardCollection = null) {
         $this->name = $name;
@@ -37,5 +39,35 @@ class Player {
 
     public function sayMakao(): string {
         return self::MAKAO;
+    }
+
+    public function pickCardByValue(string $value): Card {
+        foreach($this->cardCollection as $index => $card) {
+            if ($card->getValue() === $value) {
+                return $this->cardCollection->pickCard($index);
+            }
+        }
+
+        throw new CardNotFoundException("Player John does not have card with value " . $value);
+    }
+
+    public function getRoundsToSkip(): int {
+        return $this->roundsToSkip;
+    }
+
+    public function canPlayRound(): bool {
+        return $this->getRoundsToSkip() === 0;
+    }
+
+    public function addRoundToSkip(int $count = 1): self {
+        $this->roundsToSkip += $count;
+
+        return $this;
+    }
+
+    public function skipRound(): self {
+        $this->roundsToSkip--;
+
+        return $this;
     }
 }
