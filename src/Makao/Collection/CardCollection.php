@@ -102,4 +102,12 @@ class CardCollection implements Countable, Iterator, ArrayAccess {
 
         return $this;
     }
+
+    public function getLastCard(): Card {
+        if ($this->count() === 0) {
+            throw new CardNotFoundException('You can not get last card from empty CardCollection');
+        }
+
+        return $this->cards[$this->count() - 1];
+    }
 }

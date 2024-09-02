@@ -185,4 +185,46 @@ class PlayerTest extends TestCase {
         $this->assertSame(0, $player->getRoundsToSkip());
         $this->assertTrue($player->canPlayRound());
     }
+
+    public function testShouldThrowCardNotFoundExceptionWhenPlayerTriesPickingCardsByValueAndDoesntHaveSuchCard(): void {
+        // Expect
+        $this->expectException(CardNotFoundException::class);
+        $this->expectExceptionMessage('Player John does not have card with value 2');
+
+        // Given
+        $player = new Player('John');
+
+        // When
+        $player->pickCardsByValue(Card::VALUE_TWO);
+    }
+
+    public function testShouldPickedCardsByValueWhenPlayerHasSuchCard(): void {
+        // Given
+        $cardCollection = new CardCollection([
+            new Card(Card::COLOR_HEART, Card::VALUE_TWO)
+        ]);
+        $player = new Player('John', clone $cardCollection);
+
+        // When
+        $actual = $player->pickCardsByValue(Card::VALUE_TWO);
+
+        // Then
+        $this->assertEquals($cardCollection, $actual);
+    }
+
+    public function testShouldReturnFirstCardsByValueWhenPlayerHasMoreCorrectCards(): void {
+        // Given
+        $cardCollection = new CardCollection([
+            new Card(Card::COLOR_HEART, Card::VALUE_TWO),
+            new Card(Card::COLOR_SPADE, Card::VALUE_TWO),
+            new Card(Card::COLOR_DIAMOND, Card::VALUE_TWO),
+        ]);
+        $player = new Player('John', clone $cardCollection);
+
+        // When
+        $actual = $player->pickCardsByValue(Card::VALUE_TWO);
+
+        // Then
+        $this->assertEquals($cardCollection, $actual);
+    }
 }

@@ -70,4 +70,21 @@ class Player {
 
         return $this;
     }
+
+    public function pickCardsByValue(string $cardValue): CardCollection {
+        $collection = new CardCollection();
+
+        try {
+            while($card = $this->pickCardByValue($cardValue)) {
+                $collection->add($card);
+            }
+        }
+        catch(CardNotFoundException $e) {
+            if($collection->count() === 0) {
+                throw $e;
+            }
+        }
+
+        return $collection;
+    }
 }
