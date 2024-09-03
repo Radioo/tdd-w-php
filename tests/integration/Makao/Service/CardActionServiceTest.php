@@ -270,4 +270,84 @@ class CardActionServiceTest extends TestCase {
         $this->assertSame($requestedCard, $this->table->getPlayedCards()->getLastCard());
         $this->assertSame($this->player2, $this->table->getCurrentPlayer());
     }
+
+    public function testShouldGiveNextPlayerFiveCardsWhenCardKingHeartWasDropped(): void {
+        // Given
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_KING);
+
+        // When
+        $this->serviceUnderTest->afterCard($card);
+
+        // Then
+        $this->assertCount(5, $this->player2->getCards());
+        $this->assertSame($this->player3, $this->table->getCurrentPlayer());
+    }
+
+    public function testShouldGivePreviousPlayerFiveCardsWhenCardKingSpadeWasDropped(): void {
+        // Given
+        $card = new Card(Card::COLOR_SPADE, Card::VALUE_KING);
+
+        // When
+        $this->serviceUnderTest->afterCard($card);
+
+        // Then
+        $this->assertCount(5, $this->player3->getCards());
+        $this->assertSame($this->player1, $this->table->getCurrentPlayer());
+    }
+
+    public function testShouldGiveCurrentPlayerTenCardsWhenCardKingHeartWasDroppedAndNextPlayerHasKingSpadeToDefend(): void {
+        // Given
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_KING);
+
+        $this->player2->getCards()->add(new Card(Card::COLOR_SPADE, Card::VALUE_KING));
+
+        // When
+        $this->serviceUnderTest->afterCard($card);
+
+        // Then
+        $this->assertCount(10, $this->player1->getCards());
+        $this->assertSame($this->player2, $this->table->getCurrentPlayer());
+    }
+
+    public function testShouldGiveCurrentPlayerTenCardsWhenCardKingSpadeWasDroppedAndPreviousPlayerHasKingSpadeToDefend(): void {
+        // Given
+        $card = new Card(Card::COLOR_SPADE, Card::VALUE_KING);
+
+        $this->player3->getCards()->add(new Card(Card::COLOR_HEART, Card::VALUE_KING));
+
+        // When
+        $this->serviceUnderTest->afterCard($card);
+
+        // Then
+        $this->assertCount(10, $this->player1->getCards());
+        $this->assertSame($this->player2, $this->table->getCurrentPlayer());
+    }
+
+    public function testShouldNotRunAnyActionForOtherKings(): void {
+        // Given
+        $card = new Card(Card::COLOR_DIAMOND, Card::VALUE_KING);
+
+        // When
+        $this->serviceUnderTest->afterCard($card);
+
+        // Then
+        $this->assertCount(0, $this->player1->getCards());
+        $this->assertCount(0, $this->player2->getCards());
+        $this->assertCount(0, $this->player3->getCards());
+        $this->assertSame($this->player2, $this->table->getCurrentPlayer());
+    }
+
+    public function testShouldNotRunAnyActionForAnyNoActionCard(): void {
+        // Given
+        $card = new Card(Card::COLOR_DIAMOND, Card::VALUE_FIVE);
+
+        // When
+        $this->serviceUnderTest->afterCard($card);
+
+        // Then
+        $this->assertCount(0, $this->player1->getCards());
+        $this->assertCount(0, $this->player2->getCards());
+        $this->assertCount(0, $this->player3->getCards());
+        $this->assertSame($this->player2, $this->table->getCurrentPlayer());
+    }
 }

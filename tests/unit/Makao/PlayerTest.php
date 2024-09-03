@@ -227,4 +227,28 @@ class PlayerTest extends TestCase {
         // Then
         $this->assertEquals($cardCollection, $actual);
     }
+
+    public function testShouldThrowCardNotFoundExceptionWhenPlayerTriesPickingCardsByValueAndColorAndDoesntHaveSuchCard(): void {
+        // Expect
+        $this->expectException(CardNotFoundException::class);
+        $this->expectExceptionMessage('Player John does not have card with value 2 and color heart');
+
+        // Given
+        $player = new Player('John');
+
+        // When
+        $player->pickCardsByValueAndColor(Card::VALUE_TWO, Card::COLOR_HEART);
+    }
+
+    public function testShouldReturnPickedCardByValueWhenPlayerHasSuchCard(): void {
+        // Given
+        $card = new Card(Card::COLOR_HEART, Card::VALUE_TWO);
+        $player = new Player('John', new CardCollection([$card]));
+
+        // When
+        $actual = $player->pickCardsByValueAndColor(Card::VALUE_TWO, Card::COLOR_HEART);
+
+        // Then
+        $this->assertSame($card, $actual);
+    }
 }

@@ -17,6 +17,8 @@ class CardValidator {
         }
 
         return $activeCard->getColor() === $newCard->getColor() ||
-            $activeCard->getValue() === $newCard->getValue();
+            $activeCard->getValue() === $newCard->getValue() ||
+            $newCard->getValue() === Card::VALUE_QUEEN ||
+            $activeCard->getValue() === Card::VALUE_QUEEN;
     }
 }

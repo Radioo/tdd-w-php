@@ -62,4 +62,10 @@ class Table
             $this->currentPlayerIndex = 0;
         }
     }
+
+    public function backRound(): void {
+        if(--$this->currentPlayerIndex < 0) {
+            $this->currentPlayerIndex = $this->countPlayers() - 1;
+        }
+    }
 }

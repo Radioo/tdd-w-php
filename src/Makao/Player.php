@@ -42,13 +42,7 @@ class Player {
     }
 
     public function pickCardByValue(string $value): Card {
-        foreach($this->cardCollection as $index => $card) {
-            if ($card->getValue() === $value) {
-                return $this->cardCollection->pickCard($index);
-            }
-        }
-
-        throw new CardNotFoundException("Player John does not have card with value " . $value);
+        return $this->pickCardsByValueAndColor($value);
     }
 
     public function getRoundsToSkip(): int {
@@ -86,5 +80,15 @@ class Player {
         }
 
         return $collection;
+    }
+
+    public function pickCardsByValueAndColor(string $value, ?string $color = null): Card {
+        foreach($this->cardCollection as $index => $card) {
+            if ($card->getValue() === $value && ($color === null || $card->getColor() === $color)) {
+                return $this->cardCollection->pickCard($index);
+            }
+        }
+
+        throw new CardNotFoundException($color ? "Player $this->name does not have card with value $value and color $color" : "Player $this->name does not have card with value $value");
     }
 }
