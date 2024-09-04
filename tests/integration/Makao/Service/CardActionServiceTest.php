@@ -8,6 +8,7 @@ use Makao\Player;
 use Makao\Service\CardActionService;
 use Makao\Table;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Util\Color;
 
 class CardActionServiceTest extends TestCase {
     private Player $player1;
@@ -349,5 +350,16 @@ class CardActionServiceTest extends TestCase {
         $this->assertCount(0, $this->player2->getCards());
         $this->assertCount(0, $this->player3->getCards());
         $this->assertSame($this->player2, $this->table->getCurrentPlayer());
+    }
+
+    public function testShouldChangeColorToPlayOnTableAfterCardAce(): void {
+        // Given
+        $requestColor = Card::COLOR_HEART;
+        $card = new Card(Card::COLOR_SPADE, Card::VALUE_ACE);
+
+        // When & Then
+        $this->assertEquals(Card::COLOR_SPADE, $this->table->getPlayedCardColor());
+        $this->serviceUnderTest->afterCard($card, $requestColor);
+        $this->assertEquals(Card::COLOR_HEART, $this->table->getPlayedCardColor());
     }
 }
