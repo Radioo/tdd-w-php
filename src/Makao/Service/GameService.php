@@ -2,10 +2,13 @@
 
 namespace Makao\Service;
 
+use Makao\Exception\GameException;
 use Makao\Player;
 use Makao\Table;
 
 class GameService {
+    private const MIN_PLAYERS = 2;
+
     private Table $table;
     private CardService $cardService;
     private bool $isStarted = false;
@@ -36,6 +39,8 @@ class GameService {
     }
 
     public function startGame(): void {
+        $this->validateBeforeStartGame();
+
         $this->isStarted = true;
     }
 
@@ -44,5 +49,15 @@ class GameService {
         $cardDeck = $this->cardService->shuffle($cardCollection);
 
         return $this->table->addCardCollectionToDeck($cardDeck);
+    }
+
+    public function validateBeforeStartGame(): void {
+        if($this->table->getCardDeck()->count() === 0) {
+            throw new GameException('Prepare card deck before game start');
+        }
+
+        if($this->table->countPlayers() < self::MIN_PLAYERS) {
+            throw new GameException("You need minimum " . self::MIN_PLAYERS . " players to start the game");
+        }
     }
 }
