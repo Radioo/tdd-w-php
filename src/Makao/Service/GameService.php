@@ -2,12 +2,14 @@
 
 namespace Makao\Service;
 
+use Exception;
 use Makao\Exception\GameException;
 use Makao\Player;
 use Makao\Table;
 
 class GameService {
-    private const MIN_PLAYERS = 2;
+    private const int MIN_PLAYERS = 2;
+    private const int STARTING_CARDS = 5;
 
     private Table $table;
     private CardService $cardService;
@@ -41,7 +43,21 @@ class GameService {
     public function startGame(): void {
         $this->validateBeforeStartGame();
 
-        $this->isStarted = true;
+        try {
+            $this->isStarted = true;
+
+            $cardDeck = $this->table->getCardDeck();
+            $card = $this->cardService->pickFirstNoActionCard($this->table->getCardDeck());
+            $this->table->addPlayedCard($card);
+
+            $players = $this->table->getPlayers();
+            foreach($players as $player) {
+                $player->takeCards($cardDeck, self::STARTING_CARDS);
+            }
+        }
+        catch(Exception $e) {
+            throw new GameException('The game needs help!', $e);
+        }
     }
 
     public function prepareCardDeck(): Table {
