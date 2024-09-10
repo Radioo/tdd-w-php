@@ -7,6 +7,8 @@ use Makao\Collection\CardCollection;
 use Makao\Exception\CardNotFoundException;
 use Makao\Exception\GameException;
 use Makao\Player;
+use Makao\Service\CardActionService;
+use Makao\Service\CardSelector\CardSelectorInterface;
 use Makao\Service\CardService;
 use Makao\Service\GameService;
 use Makao\Table;
@@ -17,14 +19,23 @@ use PHPUnit\Framework\TestCase;
 class GameServiceTest extends TestCase {
     private readonly GameService $gameServiceUnderTest;
     private readonly MockObject|CardService $cardServiceMock;
+    private readonly MockObject|CardActionService $cardActionServiceMock;
+    private readonly MockObject|CardSelectorInterface $cardSelectorMock;
 
     /**
      * @throws Exception
      */
     protected function setUp(): void {
+        $this->cardSelectorMock = $this->createMock(CardSelectorInterface::class);
+        $this->cardActionServiceMock = $this->createMock(CardActionService::class);
         $this->cardServiceMock = $this->createMock(CardService::class);
 
-        $this->gameServiceUnderTest = new GameService(new Table(), $this->cardServiceMock);
+        $this->gameServiceUnderTest = new GameService(
+            new Table(),
+            $this->cardServiceMock,
+            $this->cardSelectorMock,
+            $this->cardActionServiceMock,
+        );
     }
 
     public function testShouldReturnFalseWhenGameIsNotStarted(): void {
@@ -304,5 +315,48 @@ class GameServiceTest extends TestCase {
         foreach($players as $player) {
             $this->assertCount(5, $player->getCards());
         }
+    }
+
+    public function testShouldChooseCardToPlayFromPlayersCardsAndPutItOnTheTable(): void {
+        // Given
+        $correctCard = new Card(Card::COLOR_HEART, Card::VALUE_FIVE);
+
+        $player1 = new Player('John', new CardCollection([
+            new Card(Card::COLOR_SPADE, Card::VALUE_EIGHT),
+            $correctCard,
+        ]));
+
+        $player2 = new Player('Andy');
+
+        $this->gameServiceUnderTest->addPlayers([$player1, $player2]);
+
+        $table = $this->gameServiceUnderTest->getTable();
+        $playedCard = new Card(Card::COLOR_HEART, Card::VALUE_SIX);
+        $table->addPlayedCard($playedCard);
+
+        $noActionCard = new Card(Card::COLOR_CLUB, Card::VALUE_FIVE);
+        $collection = new CardCollection([
+            new Card(Card::COLOR_CLUB, Card::VALUE_ACE),
+            new Card(Card::COLOR_CLUB, Card::VALUE_KING),
+            new Card(Card::COLOR_CLUB, Card::VALUE_QUEEN),
+            new Card(Card::COLOR_CLUB, Card::VALUE_JACK),
+        ]);
+
+        $table->addCardCollectionToDeck($collection);
+
+        $this->cardSelectorMock->expects($this->once())
+            ->method('chooseCard')
+            ->with($player1, $playedCard, $table->getPlayedCardColor())
+            ->willReturn($correctCard);
+
+        $this->cardActionServiceMock->expects($this->once())
+            ->method('afterCard')
+            ->with($correctCard);
+
+        // When
+        $this->gameServiceUnderTest->playRound();
+
+        // Then
+        $this->assertSame($correctCard, $table->getPlayedCards()->getLastCard());
     }
 }

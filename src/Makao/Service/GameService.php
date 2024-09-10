@@ -5,6 +5,7 @@ namespace Makao\Service;
 use Exception;
 use Makao\Exception\GameException;
 use Makao\Player;
+use Makao\Service\CardSelector\CardSelectorInterface;
 use Makao\Table;
 
 class GameService {
@@ -13,11 +14,20 @@ class GameService {
 
     private Table $table;
     private CardService $cardService;
+    private CardSelectorInterface $cardSelector;
+    private CardActionService $cardActionService;
     private bool $isStarted = false;
 
-    public function __construct(Table $table, CardService $cardService) {
+    public function __construct(
+        Table $table,
+        CardService $cardService,
+        CardSelectorInterface $cardSelector,
+        CardActionService $cardActionService,
+    ) {
         $this->table = $table;
         $this->cardService = $cardService;
+        $this->cardSelector = $cardSelector;
+        $this->cardActionService = $cardActionService;
     }
 
     public function isStarted(): bool {
@@ -75,5 +85,19 @@ class GameService {
         if($this->table->countPlayers() < self::MIN_PLAYERS) {
             throw new GameException("You need minimum " . self::MIN_PLAYERS . " players to start the game");
         }
+    }
+
+    public function playRound(): void {
+        $player = $this->table->getCurrentPlayer();
+
+        $card = $this->cardSelector->chooseCard(
+            $player,
+            $this->table->getPlayedCards()->getLastCard(),
+            $this->table->getPlayedCardColor()
+        );
+
+        $this->table->addPlayedCard($card);
+
+        $this->cardActionService->afterCard($card);
     }
 }
