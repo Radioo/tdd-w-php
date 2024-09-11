@@ -359,4 +359,91 @@ class GameServiceTest extends TestCase {
         // Then
         $this->assertSame($correctCard, $table->getPlayedCards()->getLastCard());
     }
+
+    public function testShouldGivePlayerOneCardWhenHeHasNoCorrectCardToPlay(): void {
+        // Given
+        $player1 = new Player('John', new CardCollection([
+            new Card(Card::COLOR_SPADE, Card::VALUE_EIGHT),
+            new Card(Card::COLOR_SPADE, Card::VALUE_SEVEN),
+        ]));
+
+        $player2 = new Player('Andy');
+
+        $this->gameServiceUnderTest->addPlayers([$player1, $player2]);
+
+        $table = $this->gameServiceUnderTest->getTable();
+        $playedCard = new Card(Card::COLOR_HEART, Card::VALUE_SIX);
+        $table->addPlayedCard($playedCard);
+
+        $noActionCard = new Card(Card::COLOR_CLUB, Card::VALUE_FIVE);
+        $collection = new CardCollection([
+            new Card(Card::COLOR_CLUB, Card::VALUE_ACE),
+            new Card(Card::COLOR_CLUB, Card::VALUE_KING),
+            new Card(Card::COLOR_CLUB, Card::VALUE_QUEEN),
+            new Card(Card::COLOR_CLUB, Card::VALUE_JACK),
+        ]);
+
+        $table->addCardCollectionToDeck($collection);
+
+        $this->cardSelectorMock->expects($this->once())
+            ->method('chooseCard')
+            ->with($player1, $playedCard, $table->getPlayedCardColor())
+            ->willThrowException(new CardNotFoundException());
+
+        $this->cardActionServiceMock->expects($this->never())
+            ->method('afterCard');
+
+        // When
+        $this->gameServiceUnderTest->playRound();
+
+        // Then
+        $this->assertSame($playedCard, $table->getPlayedCards()->getLastCard());
+        $this->assertCount(3, $player1->getCards());
+        $this->assertCount(3, $table->getCardDeck());
+        $this->assertSame($player2, $table->getCurrentPlayer());
+    }
+
+    public function testShouldSkipPlayerRoundWhenHeCannotPlayRound(): void {
+        // Given
+        $player1 = new Player('John', new CardCollection([
+            new Card(Card::COLOR_SPADE, Card::VALUE_EIGHT),
+            new Card(Card::COLOR_SPADE, Card::VALUE_SEVEN),
+        ]));
+
+        $player2 = new Player('Andy');
+
+        $this->gameServiceUnderTest->addPlayers([$player1, $player2]);
+
+        $table = $this->gameServiceUnderTest->getTable();
+        $playedCard = new Card(Card::COLOR_HEART, Card::VALUE_SIX);
+        $table->addPlayedCard($playedCard);
+
+        $noActionCard = new Card(Card::COLOR_CLUB, Card::VALUE_FIVE);
+        $collection = new CardCollection([
+            new Card(Card::COLOR_CLUB, Card::VALUE_ACE),
+            new Card(Card::COLOR_CLUB, Card::VALUE_KING),
+            new Card(Card::COLOR_CLUB, Card::VALUE_QUEEN),
+            new Card(Card::COLOR_CLUB, Card::VALUE_JACK),
+        ]);
+
+        $table->addCardCollectionToDeck($collection);
+
+        $this->cardSelectorMock->expects($this->never())
+            ->method('chooseCard')
+            ->with($player1, $playedCard, $table->getPlayedCardColor());
+
+        $this->cardActionServiceMock->expects($this->never())
+            ->method('afterCard');
+
+        $player1->addRoundToSkip(2);
+
+        // When
+        $this->gameServiceUnderTest->playRound();
+
+        // Then
+        $this->assertSame($playedCard, $table->getPlayedCards()->getLastCard());
+        $this->assertCount(2, $player1->getCards());
+        $this->assertCount(4, $table->getCardDeck());
+        $this->assertSame($player2, $table->getCurrentPlayer());
+    }
 }
